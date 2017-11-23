@@ -32,15 +32,8 @@ def ensure_argv_len(val):
 def link(source):
     path = Path(os.path.abspath(source))
     print('[INFO] creating bat for {}'.format(path))
-    lines = [
-        '@echo off',
-        'if exist "{path}" (',
-        '    "{path}" %*',
-        ') else (',
-        '    echo {path} is not exists, please reset the bat file.',
-        ')'
-    ]
-    content = '\n'.join(lines).format(path=path)
+    with open(os.path.join(Path(sys.argv[0]).dirname, 'template.bat'), 'r', encoding='utf8') as fp:
+        content = fp.read().format(path=path)
     with open(os.path.join(SCRIPTS_ROOT, path.pure_name + '.bat'), 'w', encoding='utf8') as fp:
         fp.write(content)
     print('[INFO] done.')
