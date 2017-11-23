@@ -31,6 +31,9 @@ def ensure_argv_len(val):
 
 def link(source):
     path = Path(os.path.abspath(source))
+    if not os.path.isfile(path):
+        print('[ERROR] {} is not a file.'.format(path))
+        raise QuickExit
     print('[INFO] creating bat for {}'.format(path))
     with open(os.path.join(Path(sys.argv[0]).dirname, 'template.bat'), 'r', encoding='utf8') as fp:
         content = fp.read().format(path=path)
