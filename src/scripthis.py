@@ -19,6 +19,7 @@ class QuickExit(Exception):
 def ensure_scripts_root():
     if SCRIPTS_ROOT is None:
         print('[ERROR] please set the env-var `SCRIPTS_ROOT`')
+        raise QuickExit
     if not os.path.isdir(SCRIPTS_ROOT):
         print('[ERROR] {} is not a dir.'.format(SCRIPTS_ROOT))
         raise QuickExit
@@ -33,9 +34,13 @@ def link(source):
     print('[INFO] creating bat for {}'.format(path))
     lines = [
         '@echo off',
-        '"{path}" %*'.format(path=path)
+        'if exist "{path}" (',
+        '    "{path}" %*',
+        ') else (',
+        '    echo {path} is not exists, please reset the bat file.',
+        ')'
     ]
-    content = '\n'.join(lines)
+    content = '\n'.join(lines).format(path=path)
     with open(os.path.join(SCRIPTS_ROOT, path.pure_name + '.bat'), 'w', encoding='utf8') as fp:
         fp.write(content)
     print('[INFO] done.')
