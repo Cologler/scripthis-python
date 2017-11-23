@@ -35,7 +35,10 @@ def link(source):
         print('[ERROR] {} is not a file.'.format(path))
         raise QuickExit
     print('[INFO] creating bat for {}'.format(path))
-    with open(os.path.join(Path(sys.argv[0]).dirname, 'template.bat'), 'r', encoding='utf8') as fp:
+    bat_path = os.path.join(Path(sys.argv[0]).dirname, 'template.bat')
+    if os.path.isfile(bat_path):
+        print('[INFO] overwriting exists file: {}'.format(bat_path))
+    with open(bat_path, 'r', encoding='utf8') as fp:
         content = fp.read().format(path=path)
     with open(os.path.join(SCRIPTS_ROOT, path.pure_name + '.bat'), 'w', encoding='utf8') as fp:
         fp.write(content)
