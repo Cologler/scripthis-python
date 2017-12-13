@@ -17,40 +17,41 @@ class QuickExit(Exception):
     pass
 
 def ensure_scripts_root():
-    if SCRIPTS_ROOT is None:
-        print('[ERROR] please set the env-var `SCRIPTS_ROOT`')
+    if not SCRIPTS_ROOT:
+        print('[ERROR] Please set the env-var `SCRIPTS_ROOT`')
         raise QuickExit
     if not os.path.isdir(SCRIPTS_ROOT):
-        print('[ERROR] {} is not a dir.'.format(SCRIPTS_ROOT))
+        print('[ERROR] <{}> is not a dir.'.format(SCRIPTS_ROOT))
         raise QuickExit
 
-def ensure_argv_len(val):
-    if len(sys.argv) != val:
-        print('[ERROR] count of argv should be {}.'.format(val))
+def ensure_argv():
+    if len(sys.argv) != 2:
+        print('[ERROR] Please provide a executable file path.')
+        print('        For example: `scripthis FILE.exe`')
         raise QuickExit
 
 def link(source):
     path = Path(os.path.abspath(source))
     if not os.path.isfile(path):
-        print('[ERROR] {} is not a file.'.format(path))
+        print('[ERROR] <{}> is not a file.'.format(path))
         raise QuickExit
-    print('[INFO] creating bat for {}'.format(path))
+    print('[INFO] Creating bat for <{}>'.format(path))
     template = os.path.join(Path(sys.argv[0]).dirname, 'template.bat')
     dest_path = os.path.join(SCRIPTS_ROOT, path.pure_name + '.bat')
     if os.path.isfile(dest_path):
-        print('[INFO] overwriting exists file: {}'.format(dest_path))
+        print('[INFO] Overwriting exists file: {}'.format(dest_path))
     with open(template, 'r', encoding='utf8') as fp:
         content = fp.read().format(path=path)
     with open(dest_path, 'w', encoding='utf8') as fp:
         fp.write(content)
-    print('[INFO] done.')
+    print('[INFO] Done.')
 
 def main(argv=None):
     if argv is None:
         argv = sys.argv
     try:
         ensure_scripts_root()
-        ensure_argv_len(2)
+        ensure_argv()
         link(argv[1])
     except QuickExit:
         return
