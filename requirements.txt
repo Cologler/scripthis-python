@@ -1,0 +1,3 @@
+fsoopify
+colorama
+coloredlogs
