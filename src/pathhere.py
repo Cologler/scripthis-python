@@ -21,31 +21,24 @@ class App(BaseApp):
 
     def run(self, argv):
         if len(argv) != 1:
-            msg = 'Please provide a executable file path.'
+            msg = 'Please provide a directory path.'
             msg += '\n' + colorama.Fore.RESET
-            msg += ' ' * 19 + 'For example: `scripthis FILE.exe`'
+            msg += ' ' * 19 + 'For example: `scripthis DIRECTORY`'
             self._log_err(msg)
             raise QuickExit
 
         source = argv[0]
 
-        def list_executeable_exts():
-            pathext = os.getenv('PATHEXT').lower()
-            return pathext.split(';')
-
         def try_detect_path():
             p = os.path.abspath(source)
-            if os.path.isfile(p):
+            if os.path.isdir(p):
                 return p
-            for ext in list_executeable_exts():
-                if os.path.isfile(p + ext):
-                    return p + ext
-            self._log_err('{} is not a file', path)
+            self._log_err('{} is not a directory', path)
             raise QuickExit
 
         path = Path(try_detect_path())
 
-        self._write_script(path, path.pure_name, {
+        self._write_script(path, path.name, {
             'path': path
         });
 
