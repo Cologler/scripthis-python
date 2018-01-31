@@ -1,3 +1,3 @@
-@echo off
+@ECHO off
 PATH = "{path}";%PATH%
-echo Running in env: {path}
+ECHO added {path} to path.

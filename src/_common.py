@@ -49,29 +49,35 @@ class BaseApp:
 
     def _log_info(self, msg: str, *args):
         def var(text): # pylint: disable=C0111
-            return colorama.Fore.LIGHTMAGENTA_EX + text + colorama.Fore.RESET
+            return colorama.Fore.LIGHTGREEN_EX + text + colorama.Fore.RESET
 
         msg = msg.format(*[var(t) for t in args])
         self._logger.info(msg)
 
     def _log_err(self, msg: str, *args):
         def var(text): # pylint: disable=C0111
-            return colorama.Fore.LIGHTMAGENTA_EX + text + colorama.Fore.RESET
+            return colorama.Fore.LIGHTGREEN_EX + text + colorama.Fore.RESET
 
         msg = msg.format(*[var(t) for t in args])
         self._logger.error(msg)
 
-    def _write_script(self, path: Path, dest_name: str, fmt_kwargs):
-        self._log_info('Creating bat for {}', path)
+    def _get_template_name(self):
+        return self._name + '-template.bat'
 
-        template = os.path.join(Path(sys.argv[0]).dirname, self._name + '-template.bat')
+    def _load_template(self):
+        template = os.path.join(Path(sys.argv[0]).dirname, self._get_template_name())
+        with open(template, 'r', encoding='utf8') as fp:
+            return fp.read()
+
+    def _write_script(self, path: Path, dest_name: str, fmt_kwargs):
+        self._log_info('Creating {} for {}', dest_name + '.bat', path)
+
         dest_path = os.path.join(self._scripts_root, dest_name + '.bat')
 
         if os.path.isfile(dest_path):
             self._log_info('Overwriting exists file: {}', dest_path)
 
-        with open(template, 'r', encoding='utf8') as fp:
-            content = fp.read().format(**fmt_kwargs)
+        content = self._load_template().format(**fmt_kwargs)
         with open(dest_path, 'w', encoding='utf8') as fp:
             fp.write(content)
 

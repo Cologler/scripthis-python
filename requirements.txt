@@ -1,3 +1,4 @@
 fsoopify
 colorama
 coloredlogs
+docopt

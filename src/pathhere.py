@@ -6,11 +6,18 @@
 #
 # ----------
 
+'''
+Path Here.
+
+Usage:
+  pathhere <dirpath> [--dest=] [--with-workdir]
+'''
+
 import os
 import sys
 import traceback
 
-import colorama
+from docopt import docopt
 from fsoopify import Path
 
 from _common import BaseApp, QuickExit
@@ -18,29 +25,31 @@ from _common import BaseApp, QuickExit
 class App(BaseApp):
     def __init__(self):
         super().__init__(Path(sys.argv[0]).name.pure_name)
+        self._mode = None
+
+    def _get_template_name(self):
+        name = self._name
+        if self._mode is not None:
+            name += f'-{self._mode}'
+        return name + '-template.bat'
 
     def run(self, argv):
-        if len(argv) != 1:
-            msg = 'Please provide a directory path.'
-            msg += '\n' + colorama.Fore.RESET
-            msg += ' ' * 19 + 'For example: `scripthis DIRECTORY`'
-            self._log_err(msg)
+        args = docopt(__doc__)
+
+        # mode
+        if args['--with-workdir']:
+            self._mode = 'cd'
+
+        p = os.path.abspath(args['<dirpath>'])
+        if not os.path.isdir(p):
+            self._log_err('{} is not a directory', p)
             raise QuickExit
 
-        source = argv[0]
+        path = Path(p)
 
-        def try_detect_path():
-            p = os.path.abspath(source)
-            if os.path.isdir(p):
-                return p
-            self._log_err('{} is not a directory', path)
-            raise QuickExit
-
-        path = Path(try_detect_path())
-
-        self._write_script(path, path.name, {
+        self._write_script(path, args['--dest'] or path.name, {
             'path': path
-        });
+        })
 
 
 def main(argv=None):
