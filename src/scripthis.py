@@ -25,7 +25,7 @@ class App(BaseApp):
             msg += '\n' + colorama.Fore.RESET
             msg += ' ' * 19 + 'For example: `scripthis FILE.exe`'
             self._log_err(msg)
-            raise QuickExit
+            exit()
 
         source = argv[0]
 
@@ -40,8 +40,8 @@ class App(BaseApp):
             for ext in list_executeable_exts():
                 if os.path.isfile(p + ext):
                     return p + ext
-            self._log_err('{} is not a file', path)
-            raise QuickExit
+            self._log_err('{} is not a file', p)
+            exit()
 
         path = Path(try_detect_path())
 
