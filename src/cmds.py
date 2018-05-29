@@ -11,7 +11,7 @@ import traceback
 
 from fsoopify import Path
 
-from _common import BaseApp, QuickExit
+from _common import BaseApp
 
 class App(BaseApp):
     def __init__(self):

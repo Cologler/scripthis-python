@@ -15,6 +15,10 @@ from fsoopify import Path
 
 from _common import BaseApp, QuickExit
 
+EVAL_TABLE = {
+    '.jar': 'java -jar'
+}
+
 class App(BaseApp):
     def __init__(self):
         super().__init__(Path(sys.argv[0]).name.pure_name)
@@ -31,7 +35,7 @@ class App(BaseApp):
 
         def list_executeable_exts():
             pathext = os.getenv('PATHEXT').lower()
-            return pathext.split(';')
+            return pathext.split(';') + list(EVAL_TABLE.keys())
 
         def try_detect_path():
             p = os.path.abspath(source)
@@ -45,9 +49,12 @@ class App(BaseApp):
 
         path = Path(try_detect_path())
 
+        eval_stmt = EVAL_TABLE.get(path.name.ext.lower(), '')
+
         self._write_script(path, path.pure_name, {
-            'path': path
-        });
+            'path': path,
+            'eval': eval_stmt
+        })
 
 
 def main(argv=None):

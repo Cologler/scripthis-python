@@ -1,6 +1,10 @@
 @echo off
 if exist "{path}" (
-    "{path}" %*
+    if "{eval}" == "" (
+        "{path}" %*
+    ) else (
+        {eval} "{path}" %*
+    )
 ) else (
     echo {path} does not exists, please reset the bat file using scripthis.
 )
