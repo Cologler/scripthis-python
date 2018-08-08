@@ -3,7 +3,7 @@
 if exist "{path}" (
     pushd {dir}
     {eval}"{path}" %*
-    popd %cwd%
+    popd
 ) else (
     echo {path} does not exists, please reset the bat file using scripthis.
 )
