@@ -1,3 +1,4 @@
+REM this script was created by scripthis
 @echo off
 if exist "{path}" (
     if "{eval}" == "" (
