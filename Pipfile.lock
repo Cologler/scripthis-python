@@ -41,10 +41,10 @@
         },
         "fsoopify": {
             "hashes": [
-                "sha256:6f6bd9f0c2907a6abd1da2d7e9348ea8e8158c2e0322dbe391023b75caba355d"
+                "sha256:ae3ec04e86f34258056643c874b19dba89e517cfbfb105ca55e794048f6f6d9b"
             ],
             "index": "pypi",
-            "version": "==0.1.14.0"
+            "version": "==0.1.16"
         },
         "humanfriendly": {
             "hashes": [

@@ -20,35 +20,56 @@ import traceback
 
 from docopt import docopt
 import colorama
-from fsoopify import Path
+from fsoopify import Path, FileInfo
 
 from _common import BaseApp, QuickExit
 
 KEY_EXEC = 'exec'
 KEY_INIT = 'init'
 KEY_TEMPLATE = 'template'
+KEY_EXT_TABLE = 'ext-table'
 
-EVAL_TABLE = {
-    '.jar': {
-        KEY_EXEC: 'java -jar'
-    },
+class ExecutorInfo:
+    def __init__(self, executor='', **envs):
+        self.executor = executor
+        self.envs = envs
 
-    '.js': {
-        KEY_EXEC: 'node'
-    },
+    def get_template(self):
+        return 'scripthis.bat'
 
-    '.ts': {
-        KEY_EXEC: 'ts-node'
-    },
+    def update_args(self, args: dict):
+        if self.executor:
+            args['eval'] = self.executor + ' '
+        else:
+            args['eval'] = ''
 
-    '.py': {
-        KEY_EXEC: 'python',
+class PipenvExecutorInfo(ExecutorInfo):
+    def get_template(self):
+        return 'scripthis-pipenv.bat'
 
-        'pipenv': {
-            KEY_EXEC: 'pipenv run python',
-            KEY_TEMPLATE: 'scripthis-tmp-cwd.bat'
-        }
-    }
+    def update_args(self, args: dict):
+        super().update_args(args)
+        script_file = FileInfo(args['path'])
+        args['pipfile'] = self._find_pipfile_path(script_file, 5)
+
+    def _find_pipfile_path(self, script_file: FileInfo, depth: int):
+        dir_info = script_file.get_parent()
+        while depth > 0:
+            pf = dir_info.get_fileinfo('Pipfile')
+            if pf.is_file():
+                return pf.path
+            dir_info = dir_info.get_parent()
+            depth -= 1
+        raise RuntimeError('cannot found Pipfile.')
+
+
+EXECUTOR_INFO_TABLE = {
+    '.jar': ExecutorInfo(executor='java -jar'),
+    '.js': ExecutorInfo(executor='node'),
+    '.ts': ExecutorInfo(executor='ts-node'),
+    '.py': ExecutorInfo(executor='python',
+        pipenv=PipenvExecutorInfo(executor='pipenv run python')
+    )
 }
 
 class App(BaseApp):
@@ -70,7 +91,7 @@ class App(BaseApp):
 
         def list_executeable_exts():
             pathext = os.getenv('PATHEXT').lower()
-            return pathext.split(';') + list(EVAL_TABLE.keys())
+            return pathext.split(';') + list(EXECUTOR_INFO_TABLE.keys())
 
         def try_detect_path():
             p = os.path.abspath(source)
@@ -84,30 +105,23 @@ class App(BaseApp):
 
         path = Path(try_detect_path())
 
-        template_name = 'scripthis.bat'
-        init = ''
+        executor_info = EXECUTOR_INFO_TABLE.get(path.name.ext.lower())
+        if executor_info is not None and env:
+            executor_info = executor_info.envs.get(env.lower())
+            env = not executor_info
 
-        eval_data = EVAL_TABLE.get(path.name.ext.lower())
-        if eval_data is not None:
-            if env and env != KEY_EXEC:
-                eval_data = eval_data.get(env.lower())
-                if eval_data is None:
-                    return self.error_unknown_env(env)
-            eval_stmt = eval_data[KEY_EXEC] + ' '
-            template_name = eval_data.get(KEY_TEMPLATE, template_name)
-            init = eval_data.get(KEY_INIT, init)
-        elif env and env != KEY_EXEC:
+        if env:
             return self.error_unknown_env(env)
-        else:
-            eval_stmt = ''
 
-        content = self.load_template(template_name).format(**{
+        executor_info = executor_info or ExecutorInfo()
+
+        args_table = {
             'path': path,
-            'dir': os.path.dirname(path),
-            'eval': eval_stmt,
-            'init': init
-        })
+            'dir': os.path.dirname(path)
+        }
 
+        executor_info.update_args(args_table)
+        content = self.load_template(executor_info.get_template()).format_map(args_table)
         self.write_script(path, path.pure_name, content)
 
 
