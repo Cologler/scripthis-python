@@ -11,7 +11,7 @@ import logging
 
 import colorama
 import coloredlogs
-from fsoopify import Path
+from fsoopify import Path, FileInfo
 
 SCRIPTS_ROOT = os.environ.get('SCRIPTS_ROOT', None)
 
@@ -28,57 +28,54 @@ def get_logger(name):
     )
     return logger
 
+MAIN_NAME = Path(sys.argv[0]).name.pure_name
+
+APP_LOGGER = get_logger(MAIN_NAME)
+
+if not SCRIPTS_ROOT:
+    APP_LOGGER.error('Please setup the env-var `SCRIPTS_ROOT`')
+    exit(1)
+
+if not os.path.isdir(SCRIPTS_ROOT):
+    APP_LOGGER.error(f'<{SCRIPTS_ROOT}> is not a dir.')
+    exit(2)
+
 class BaseApp:
-    ''''''
-
-    def __init__(self, name):
-        self._name = name
-        self._logger = get_logger(name)
-        self._scripts_root =  SCRIPTS_ROOT
-
-        if not self._scripts_root:
-            self._logger.error('Please setup the env-var `SCRIPTS_ROOT`')
-            raise QuickExit
-
-        if not os.path.isdir(self._scripts_root):
-            self._logger.error(f'<{self._scripts_root}> is not a dir.')
-            raise QuickExit
+    def __init__(self):
+        self._name = MAIN_NAME
+        self._logger = APP_LOGGER
+        self._scripts_root = SCRIPTS_ROOT
 
     def run(self, argv):
         raise NotImplementedError
 
-    def _log_info(self, msg: str, *args):
+    def log_info(self, msg: str, *args):
         def var(text): # pylint: disable=C0111
             return colorama.Fore.LIGHTGREEN_EX + text + colorama.Fore.RESET
 
         msg = msg.format(*[var(t) for t in args])
         self._logger.info(msg)
 
-    def _log_err(self, msg: str, *args):
+    def log_error(self, msg: str, *args):
         def var(text): # pylint: disable=C0111
             return colorama.Fore.LIGHTGREEN_EX + text + colorama.Fore.RESET
 
         msg = msg.format(*[var(t) for t in args])
         self._logger.error(msg)
 
-    def _get_template_name(self):
-        return self._name + '-template.bat'
+    def load_template(self, name):
+        path = os.path.join(Path(sys.argv[0]).dirname, 'templates', name)
+        return FileInfo(path).read_text()
 
-    def _load_template(self):
-        template = os.path.join(Path(sys.argv[0]).dirname, self._get_template_name())
-        with open(template, 'r', encoding='utf8') as fp:
-            return fp.read()
-
-    def _write_script(self, path: Path, dest_name: str, fmt_kwargs):
-        self._log_info('Creating {} for {}', dest_name + '.bat', path)
+    def write_script(self, path: Path, dest_name: str, content: str):
+        self.log_info('Creating {} for {}', dest_name + '.bat', path)
 
         dest_path = os.path.join(self._scripts_root, dest_name + '.bat')
 
         if os.path.isfile(dest_path):
-            self._log_info('Overwriting exists file: {}', dest_path)
+            self.log_info('Overwriting exists file: {}', dest_path)
 
-        content = self._load_template().format(**fmt_kwargs)
         with open(dest_path, 'w', encoding='utf8') as fp:
             fp.write(content)
 
-        self._log_info('Done.')
+        self.log_info('Done.')

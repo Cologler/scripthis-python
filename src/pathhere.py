@@ -24,7 +24,7 @@ from _common import BaseApp, QuickExit
 
 class App(BaseApp):
     def __init__(self):
-        super().__init__(Path(sys.argv[0]).name.pure_name)
+        super().__init__()
         self._mode = None
 
     def _get_template_name(self):
@@ -42,14 +42,16 @@ class App(BaseApp):
 
         p = os.path.abspath(args['<dirpath>'])
         if not os.path.isdir(p):
-            self._log_err('{} is not a directory', p)
-            raise QuickExit
+            self.log_error('{} is not a directory', p)
+            exit(1)
 
         path = Path(p)
 
-        self._write_script(path, args['--dest'] or path.name, {
+        content = self.load_template(self._get_template_name()).format_map({
             'path': path
         })
+
+        self.write_script(path, args['--dest'] or path.name, content)
 
 
 def main(argv=None):
