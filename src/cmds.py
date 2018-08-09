@@ -14,28 +14,29 @@ from fsoopify import Path
 from _common import BaseApp
 
 class App(BaseApp):
-    def __init__(self):
-        super().__init__(Path(sys.argv[0]).name.pure_name)
 
     def run(self, argv):
-        self._cmds_in_dir(self._scripts_root)
+        self.cmds_in_dir(self._scripts_root, 'envvar: <SCRIPTS_ROOT>')
         path_here = os.environ.get('PATH_HERE')
         if path_here:
             for path in path_here.split(os.pathsep):
                 if path.startswith('"') and path.endswith('"'):
                     path = path[1:-1]
-                self._cmds_in_dir(path)
+                self.cmds_in_dir(path)
 
-    def _cmds_in_dir(self, path):
+    def cmds_in_dir(self, path, desc=None):
         if not os.path.isdir(path):
             return
         names = []
         for name in os.listdir(path):
             names.append(Path(name).pure_name)
-        self._log_info('commands in {}', path)
-        self._print_cmds(names)
+        msg = 'commands in {}'
+        if desc:
+            msg += f' ({desc})'
+        self.log_info(msg, path)
+        self.print_cmds(names)
 
-    def _print_cmds(self, cmds):
+    def print_cmds(self, cmds):
         for index, name in enumerate(cmds):
             name += '\t' * (2 - len(name) % 16 // 8)
             end = '\n' if index % 6 == 5 else ''
