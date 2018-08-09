@@ -108,9 +108,8 @@ class App(BaseApp):
         executor_info = EXECUTOR_INFO_TABLE.get(path.name.ext.lower())
         if executor_info is not None and env:
             executor_info = executor_info.envs.get(env.lower())
-            env = not executor_info
 
-        if env:
+        if not executor_info and env:
             return self.error_unknown_env(env)
 
         executor_info = executor_info or ExecutorInfo()

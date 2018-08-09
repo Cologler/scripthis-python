@@ -51,14 +51,14 @@ class BaseApp:
 
     def log_info(self, msg: str, *args):
         def var(text): # pylint: disable=C0111
-            return colorama.Fore.LIGHTGREEN_EX + text + colorama.Fore.RESET
+            return f'{colorama.Fore.LIGHTGREEN_EX}{text}{colorama.Fore.RESET}'
 
         msg = msg.format(*[var(t) for t in args])
         self._logger.info(msg)
 
     def log_error(self, msg: str, *args):
         def var(text): # pylint: disable=C0111
-            return colorama.Fore.LIGHTGREEN_EX + text + colorama.Fore.RESET
+            return f'{colorama.Fore.LIGHTGREEN_EX}{text}{colorama.Fore.RESET}'
 
         msg = msg.format(*[var(t) for t in args])
         self._logger.error(msg)
