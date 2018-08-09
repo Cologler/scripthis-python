@@ -5,6 +5,7 @@
 # call pipenv run *args without change work dir.
 # ----------
 
+import os
 import sys
 import traceback
 
@@ -24,14 +25,18 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
     try:
-        sys.argv = ['pipenv', 'run'] + sys.argv[1:]
+        if len(sys.argv) > 1:
+            script_file = NodeInfo.from_path(sys.argv[1])
+            script_file = script_file or NodeInfo.from_path(sys.argv[1] + '.py')
+            if script_file:
+                abspath = os.path.abspath(script_file.path)
+                sys.argv[1] = abspath
+                script_file = NodeInfo.from_path(abspath)
 
-        if len(sys.argv) > 2:
-            import pipenv.environments as environments
-            environments.PIPENV_PIPFILE = find_pipfile_path(NodeInfo.from_path(sys.argv[2]), 5)
+                import pipenv.environments as environments
+                environments.PIPENV_PIPFILE = find_pipfile_path(script_file, 5)
 
-        import pipenv.core as core
-        print(core.project.virtualenv_location)
+        sys.argv = ['pipenv', 'run', 'python'] + sys.argv[1:]
 
         from pipenv import cli
         cli()
