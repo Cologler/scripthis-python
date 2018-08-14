@@ -11,7 +11,7 @@ Scripthis
     create shortcut of file.
 
 Usage:
-    scripthis <FILE> [--env=]
+    scripthis <FILE> [--env=] [--rel=] [--name=]
 '''
 
 import os
@@ -22,7 +22,7 @@ from docopt import docopt
 import colorama
 from fsoopify import Path, FileInfo
 
-from _common import BaseApp, QuickExit
+from _common import BaseApp, path_rel_onedrive
 
 KEY_EXEC = 'exec'
 KEY_INIT = 'init'
@@ -88,6 +88,8 @@ class App(BaseApp):
         args = docopt(__doc__)
         source = args['<FILE>']
         env = args['--env']
+        rel = args['--rel']
+        arg_name = args['--name']
 
         def list_executeable_exts():
             pathext = os.getenv('PATHEXT').lower()
@@ -114,14 +116,24 @@ class App(BaseApp):
 
         executor_info = executor_info or ExecutorInfo()
 
+        if rel is None:
+            rel_co = lambda x: x
+        elif rel.lower() == 'onedrive':
+            rel_co = path_rel_onedrive
+        else:
+            print(f'unknown rel args: {rel}')
+            return exit(1)
+
         args_table = {
             'path': path,
             'dir': os.path.dirname(path)
         }
-
         executor_info.update_args(args_table)
+        for k, v in list(args_table.items()):
+            args_table[k] = rel_co(v)
+
         content = self.load_template(executor_info.get_template()).format_map(args_table)
-        self.write_script(path, path.pure_name, content)
+        self.write_script(path, arg_name or path.pure_name, content)
 
 
 def main(argv=None):
@@ -130,8 +142,6 @@ def main(argv=None):
     try:
         app = App()
         app.run(argv[1:])
-    except QuickExit:
-        return
     except Exception:
         traceback.print_exc()
         input()

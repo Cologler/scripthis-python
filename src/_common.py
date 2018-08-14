@@ -79,3 +79,14 @@ class BaseApp:
             fp.write(content)
 
         self.log_info('Done.')
+
+
+def path_rel_onedrive(path: str):
+    onedrive_path = os.environ.get('OneDrive', None)
+    if onedrive_path is None:
+        APP_LOGGER.error('OneDrive path not detected.')
+        exit(1)
+    index = os.path.normcase(path).find(os.path.normcase(onedrive_path))
+    if index < 0:
+        return path
+    return path[0:index] + r'%onedrive%' + path[index+len(onedrive_path):]
