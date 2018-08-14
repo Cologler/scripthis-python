@@ -6,4 +6,5 @@ if exist "{path}" (
     popd
 ) else (
     echo {path} does not exists, please reset the bat file using scripthis.
+    exit /b 1
 )
