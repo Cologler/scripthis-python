@@ -20,7 +20,7 @@ import traceback
 from docopt import docopt
 from fsoopify import Path
 
-from _common import BaseApp, QuickExit
+from _common import BaseApp
 
 class App(BaseApp):
     def __init__(self):
@@ -60,8 +60,6 @@ def main(argv=None):
     try:
         app = App()
         app.run(argv[1:])
-    except QuickExit:
-        return
     except Exception:
         traceback.print_exc()
         input()

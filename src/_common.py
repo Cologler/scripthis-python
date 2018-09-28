@@ -15,9 +15,6 @@ from fsoopify import Path, FileInfo
 
 SCRIPTS_ROOT = os.environ.get('SCRIPTS_ROOT', None)
 
-class QuickExit(Exception):
-    pass
-
 def get_logger(name):
     logger = logging.getLogger(name)
     coloredlogs.install(
