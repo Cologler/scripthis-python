@@ -8,6 +8,7 @@ fsoopify = "*"
 colorama = "*"
 coloredlogs = "*"
 docopt = "*"
+click-anno = "*"
 
 [dev-packages]
 
