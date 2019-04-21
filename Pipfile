@@ -9,6 +9,7 @@ colorama = "*"
 coloredlogs = "*"
 docopt = "*"
 click-anno = "*"
+execode = "*"
 
 [dev-packages]
 
