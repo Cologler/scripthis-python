@@ -118,6 +118,7 @@ class PipenvExecutorInfo(ExecutorInfo):
             depth -= 1
         raise RuntimeError('cannot found Pipfile.')
 
+
 class FolderExecutorInfo(ExecutorInfo):
     def update_args(self, app: App, args: dict):
         app.error('folder without env is not callable')
@@ -132,10 +133,11 @@ EXECUTOR_INFO_TABLE = {
         pipenv=PipenvExecutorInfo(executor='pipenv run python')
     )
 }
-EXECUTOR_INFO_TABLE['folder'].envs['py-m'] = ExecutorInfo(executor='python -m')
-EXECUTOR_INFO_TABLE['folder'].envs['python-m'] = ExecutorInfo(executor='python -m')
-EXECUTOR_INFO_TABLE['folder'].envs['pipenv-py-m'] = PipenvExecutorInfo(executor='pipenv run python -m')
-EXECUTOR_INFO_TABLE['folder'].envs['pipenv-python-m'] = PipenvExecutorInfo(executor='pipenv run python -m')
+EXECUTOR_INFO_TABLE['folder'].envs['py-m'] = ExecutorInfo(executor='run-pym')
+EXECUTOR_INFO_TABLE['folder'].envs['python-m'] = ExecutorInfo(executor='run-pym')
+EXECUTOR_INFO_TABLE['folder'].envs['pipenv'] = ExecutorInfo(executor='pipenv-run-pym')
+EXECUTOR_INFO_TABLE['folder'].envs['pipenv-py-m'] = ExecutorInfo(executor='pipenv-run-pym')
+EXECUTOR_INFO_TABLE['folder'].envs['pipenv-python-m'] = ExecutorInfo(executor='pipenv-run-pym')
 
 @command
 def cli(ctx: click.Context, path: str, name: str=None, env: str=None, rel: str=None):
