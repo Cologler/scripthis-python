@@ -130,7 +130,7 @@ EXECUTOR_INFO_TABLE = {
     '.js': ExecutorInfo(executor='node'),
     '.ts': ExecutorInfo(executor='ts-node'),
     '.py': ExecutorInfo(executor='python',
-        pipenv=PipenvExecutorInfo(executor='pipenv run python')
+        pipenv=ExecutorInfo(executor='pipenv-run-py')
     )
 }
 EXECUTOR_INFO_TABLE['folder'].envs['py-m'] = ExecutorInfo(executor='run-pym')
